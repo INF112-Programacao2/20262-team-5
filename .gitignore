@@ -1,0 +1,16 @@
+.vscode/
+build-imgui-sfml/
+build/
+*.o
+*.obj
+*.exe
+*.dll
+*.a
+*.lib
+
+F1-MANAGER-backup/
+imgui/
+imgui-sfml/
+F1-MANAGER/data/imgui.ini
+
+F1-MANAGER/data/imgui.ini
