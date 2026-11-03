@@ -1,3 +1,6 @@
+#ifndef TRANSACAO_H
+#define TRASACAO_H
+
 #include <string>
 
 class Transacao {
@@ -18,3 +21,5 @@ class Transacao {
         std::string getDescricao();
         void setDescricao(std::string descricao);
 };
+
+#endif

@@ -27,11 +27,11 @@ class Financeiro {
         double getReceitasTotais();
         void setReceitasTotais(double receitasTotais);
 
-        double getTransacao(int i);
+        Transacao getTransacao(int i);
         void setTransacao(Transacao transacao, int i);
 
-        void adicionarFundos(double valor);
-        void removerFundos(double valor);
+        void adicionarFundos(double valor, std::string data, std::string descricao);
+        void removerFundos(double valor, std::string data, std::string descricao);
         void exibirHistoricoDeTransacoes();
 };
 
