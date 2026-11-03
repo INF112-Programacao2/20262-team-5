@@ -47,15 +47,19 @@ void Financeiro::setTransacao(Transacao transacao, int i){
 }
 
 void Financeiro::adicionarFundos(double valor, std::string data, std::string descricao){
+    _receitasTotais += valor;
     _saldo += valor;
     Transacao transacao(valor, data, descricao);
     _transacoes.push_back(transacao);
 }
 void Financeiro::removerFundos(double valor, std::string data, std::string descricao){
+    if((_despesasTotais + valor) - _receitasTotais <= _orcamento){
+        _despesasTotais += valor;
         valor *= -1;
         _saldo += valor;
         Transacao transacao(valor, data, descricao);
         _transacoes.push_back(transacao);
+    }
 }
 void Financeiro::exibirHistoricoDeTransacoes(){
     for(int i=_transacoes.size()-1; i>=0; i--){
