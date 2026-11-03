@@ -9,10 +9,26 @@ class Financeiro {
         double _saldo;
         double _orcamento;
         double _despesasTotais;
-        _transacoes = new vector<Transacao>
+        double _receitasTotais;
+        std::vector<Transacao> _transacoes;
     public:
-        Financeiro(double saldo, double orcamento, double despesastotais);
+        Financeiro(double orcamento);
         ~Financeiro();
+
+        double getSaldo();
+        void setSaldo(double saldo);
+
+        double getOrcamento();
+        void setOrcamento(double orcamento);
+
+        double getDespesasTotais();
+        void setDespesasTotais(double despesasTotais);
+
+        double getReceitasTotais();
+        void setReceitasTotais(double receitasTotais);
+
+        double getTransacao(int i);
+        void setTransacao(Transacao transacao, int i);
 
         void adicionarFundos(double valor);
         void removerFundos(double valor);
