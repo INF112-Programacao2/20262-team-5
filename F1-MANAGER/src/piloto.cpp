@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
-#include "piloto.hpp"
+#include "../include/piloto.hpp"
 
 Piloto::Piloto(std::string nome, std::string cpf, int idade, const Carro& carro, int duracao,double salario, double rescisao)
      : Pessoa(nome, id, idade), _carro(carro), _contrato(duracao, salario, rescisao){
