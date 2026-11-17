@@ -4,16 +4,14 @@
 #include <vector>
 #include <string>
 
-class Resultado {};
-//provisoro : implementar resultado
+#include "resultado.hpp"
+#include "circuito.hpp"
 
 class Corrida {
     private:
         std::vector<Resultado> _resultados; //posicao de cada piloto
         std::string _data;
-        double _tamanhoCircuito;
-        int _qtdCurvas;
-        int _qtdVoltas;
+        Circuito _circuito;
         int _clima;
         /*
         1 - Sol
@@ -22,7 +20,7 @@ class Corrida {
         */
 
     public:
-        Corrida();
+        Corrida(std::string data, Circuito circuito, int clima);
         ~Corrida();
 
         Resultado getResultado(int indice);
@@ -31,14 +29,8 @@ class Corrida {
         std::string getData();
         void setData(std::string data);
 
-        double getTamanho();
-        void setTamanho(double tamanho);
-
-        int getCurvas();
-        void setCurvas(int curvas);
-
-        int getVoltas();
-        void setVoltas(int voltas);
+        Circuito getCircuito();
+        void setCircuito(Circuito circuito);
 
         int getClima();
         void setClima(int clima);
