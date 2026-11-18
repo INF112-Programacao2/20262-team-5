@@ -14,13 +14,13 @@ class Resultado {
         int _pontos;
 
     public:
-        Resultado(Piloto piloto, int colocacao, int tempo, bool completoucorrida, int pontos);
+        Resultado(Piloto piloto, int colocacao, int tempo, bool completouCorrida, int pontos);
         ~Resultado();
 
         Piloto getPiloto();
         void setPiloto(Piloto piloto);
 
-        int getColocacao();
+        int getColocacao() const;
         void setColocacao(int colocacao);
 
         double getTempo();
