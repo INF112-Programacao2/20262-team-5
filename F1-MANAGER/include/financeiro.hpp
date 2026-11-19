@@ -29,9 +29,15 @@ class Financeiro {
 
         Transacao getTransacao(int i);
         void setTransacao(Transacao transacao, int i);
-
+        
+        //Registra uma transacao positiva - aumenta o saldo - registra nas receitas totais
         void adicionarFundos(double valor, std::string data, std::string descricao);
+
+        //Caso o orcamento permita --> reduz o saldo - registra uma transacao negativa - registra nas despesas totais
         void removerFundos(double valor, std::string data, std::string descricao);
+
+        //Exibe as transacoes a partir da mais recente
+        //Por enquanto eh fe de que o usuario vai colocar na ordem certa, mas um sort nao faria mal
         void exibirHistoricoDeTransacoes();
 };
 

@@ -40,12 +40,17 @@ class Corrida {
         double calcularCoeficienteVelocidade();
         double calcularCoeficienteAceleracao();
 
+        //Ordena os pilotos - vai ser util no relatorio
         void ordenarPilotosCrescente();
         void ordenarPilotosDecrescente();
+
+        //Vai ser usado no relatorio
+        void exibirResultados();
 
         //Se por algum motivo um corredor nao terminar a corrida, deve ser desconsiderado
         void desconsiderarDesclassificados();
 
+        //??? - confiei no plano
         void iniciar();
         void finalizar();
 };

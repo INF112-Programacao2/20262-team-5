@@ -1,5 +1,7 @@
 #include "corrida.hpp"
 #include <algorithm>
+#include <iostream>
+#include <iomanip>
 
 Corrida::Corrida(std::string data, Circuito circuito, int clima):
     _data(data), _circuito(circuito), _clima(clima) {}
@@ -78,6 +80,19 @@ void Corrida::desconsiderarDesclassificados(){
             _resultados.erase(_resultados.begin() + i);
             i--;
         }
+    }
+}
+
+void Corrida::exibirResultados(){
+
+    desconsiderarDesclassificados();
+
+    for(int i=_resultados.size()-1; i>=0; i--){
+        //esperar a implementacao da classe pessoa
+        // std::cout << "Piloto: " << _resultados[i].getPiloto().getNome() << "\n";
+        std::cout << "Colocacao: " << _resultados[i].getColocacao() << ".\n";
+        std::cout << std::fixed << std::setprecision(2) << "Tempo: " << _resultados[i].getTempo() << ".\n";
+        std::cout << "Pontos: " << _resultados[i].getPontos() << ".\n";
     }
 }
 
