@@ -1,8 +1,8 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <vector>
 #include "../include/financeiro.hpp"
-#include "../include/transacao.hpp"
 
 Financeiro::Financeiro(double orcamento):
 _saldo(0), _orcamento(orcamento), _despesasTotais(0), _receitasTotais(0) {}
@@ -63,8 +63,8 @@ void Financeiro::removerFundos(double valor, std::string data, std::string descr
 }
 void Financeiro::exibirHistoricoDeTransacoes(){
     for(int i=_transacoes.size()-1; i>=0; i--){
-        std::cout << std::fixed << std::setprecision(2) << "Valor: " << _transacoes[i].getValor() << "\n";
-        std::cout << "Data: " << _transacoes[i].getData() << "\n";
-        std::cout << "Descricao: " << _transacoes[i].getDescricao() << "\n\n";
+        std::cout << std::fixed << std::setprecision(2) << "Valor: R$" << _transacoes[i].getValor() << ".\n";
+        std::cout << "Data: " << _transacoes[i].getData() << ".\n";
+        std::cout << "Descricao: " << _transacoes[i].getDescricao() << ".\n";
     }
 }
