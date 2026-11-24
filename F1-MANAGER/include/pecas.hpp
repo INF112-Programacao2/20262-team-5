@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "f1/IFPeca.hpp"
+#include "IFpeca.hpp"
 
 #include <algorithm>
 #include <cmath>
