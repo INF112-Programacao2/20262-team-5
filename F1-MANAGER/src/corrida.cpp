@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
-#include <limits>
+#include <limits>                                                                                                                                                                                                                                                                                                                                                                                            
 #include <stdexcept>
 #include <utility>
 
@@ -365,8 +365,11 @@ void Corrida::desconsiderarDesclassificados() {
 // ===============================
 
 //Vai ser usado no relatorio
+
 void Corrida::exibirResultados() const {
+
     for (const Resultado& r : _resultados) {
+
         std::cout
             << "Piloto: " << r.getPiloto().getNome() << '\n'
             << "Posicao: "
@@ -380,17 +383,29 @@ void Corrida::exibirResultados() const {
             << r.getVoltasConcluidas()
             << '/' << _qtdVoltas << '\n'
 
-            << "Pontos: " << r.getPontos() << '\n'
+            << "Pontos: " << r.getPontos() << '\n';
 
-            << "Status: "
-            << (r.getDesclassificado() ? "DSQ" :
-                (r.getCompletouCorrida()
-                    ? "Finalizou" : "DNF"))
+        // Identifica a situacao final do piloto.
+        const std::string status =
+            r.getDesclassificado() ? "DSQ" :
+            r.getCompletouCorrida() ? "Finalizou" :
+            "DNF";
 
-            << " - " << r.getOcorrencia()
-            << "\n\n";
+        std::cout << "Status: " << status;
+
+        // Exibe a ocorrencia somente quando adiciona
+        // informacao ao status principal.
+        if (!r.getOcorrencia().empty() &&
+            r.getOcorrencia() != status) {
+
+            std::cout << " - " << r.getOcorrencia();
+        }
+
+        std::cout << "\n\n";
     }
 }
+
+
 
 // ===============================
 // INICIAR CORRIDA
