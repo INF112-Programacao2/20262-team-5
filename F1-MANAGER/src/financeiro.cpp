@@ -1,70 +1,163 @@
-#include <iostream>
+
+#include "financeiro.hpp"
+
+#include <cmath>
 #include <iomanip>
-#include <string>
-#include <vector>
-#include "../include/financeiro.hpp"
+#include <iostream>
+#include <stdexcept>
+#include <utility>
 
-Financeiro::Financeiro(double orcamento):
-_saldo(0), _orcamento(orcamento), _despesasTotais(0), _receitasTotais(0) {}
+namespace {
 
-Financeiro::~Financeiro() {}
+// rejeitair valores negativos, infinitos e NaN para manter o caixa valido.
+void validarNaoNegativo(double valor) {
+    if (!std::isfinite(valor) || valor < 0.0) {
+        throw std::invalid_argument(
+            "Valor financeiro invalido."
+        );
+    }
+}
 
-double Financeiro::getSaldo(){
+//  esta verificacao nas movimentacoes, que devem ter valor maior que zero.
+void validarPositivo(double valor) {
+    if (!std::isfinite(valor) || valor <= 0.0) {
+        throw std::invalid_argument(
+            "O valor deve ser positivo."
+        );
+    }
+}
+
+} // namespace
+
+Financeiro::Financeiro(double orcamento)
+    : _saldo(orcamento),
+      _orcamento(orcamento),
+      _despesasTotais(0.0),
+      _receitasTotais(0.0) {
+
+    //  considero o orcamento inicial como o dinheiro disponivel em caixa.
+    validarNaoNegativo(orcamento);
+}
+
+double Financeiro::getSaldo() const {
     return _saldo;
 }
-void Financeiro::setSaldo(double saldo){
+
+void Financeiro::setSaldo(double saldo) {
+    validarNaoNegativo(saldo);
     _saldo = saldo;
 }
 
-double Financeiro::getOrcamento(){
+double Financeiro::getOrcamento() const {
     return _orcamento;
 }
-void Financeiro::setOrcamento(double orcamento){
+
+void Financeiro::setOrcamento(double orcamento) {
+    validarNaoNegativo(orcamento);
     _orcamento = orcamento;
 }
 
-double Financeiro::getDespesasTotais(){
+double Financeiro::getDespesasTotais() const {
     return _despesasTotais;
 }
-void Financeiro::setDespesasTotais(double despesasTotais){
+
+void Financeiro::setDespesasTotais(double despesasTotais) {
+    validarNaoNegativo(despesasTotais);
     _despesasTotais = despesasTotais;
 }
 
-double Financeiro::getReceitasTotais(){
+double Financeiro::getReceitasTotais() const {
     return _receitasTotais;
 }
-void Financeiro::setReceitasTotais(double receitasTotais){
+
+void Financeiro::setReceitasTotais(double receitasTotais) {
+    validarNaoNegativo(receitasTotais);
     _receitasTotais = receitasTotais;
 }
 
-Transacao Financeiro::getTransacao(int i){
-    return _transacoes[i];
-}
-void Financeiro::setTransacao(Transacao transacao, int i){
-    _transacoes[i].setValor(transacao.getValor());
-    _transacoes[i].setData(transacao.getData());
-    _transacoes[i].setDescricao(transacao.getDescricao());
+Transacao Financeiro::getTransacao(int i) const {
+    // usei o at() para identificar acessos fora dos limites do vetor.
+    return _transacoes.at(static_cast<std::size_t>(i));
 }
 
-void Financeiro::adicionarFundos(double valor, std::string data, std::string descricao){
+void Financeiro::setTransacao(Transacao transacao, int i) {
+    // mantenho este metodo para compatibilidade com o projeto original.
+    // Nas operacoes normais, eu prefiro registrar receitas e despesas pelos metodos proprios.
+    _transacoes.at(static_cast<std::size_t>(i)) =
+        std::move(transacao);
+}
+
+std::size_t Financeiro::quantidadeTransacoes() const {
+    return _transacoes.size();
+}
+
+void Financeiro::adicionarFundos(
+    double valor,
+    std::string data,
+    std::string descricao
+) {
+    validarPositivo(valor);
+
+    // registrei a receita antes de atualizar o caixa e os totais.
+    _transacoes.emplace_back(
+        valor,
+        std::move(data),
+        std::move(descricao)
+    );
+
     _receitasTotais += valor;
     _saldo += valor;
-    Transacao transacao(valor, data, descricao);
-    _transacoes.push_back(transacao);
 }
-void Financeiro::removerFundos(double valor, std::string data, std::string descricao){
-    if((_despesasTotais + valor) - _receitasTotais <= _orcamento){
-        _despesasTotais += valor;
-        valor *= -1;
-        _saldo += valor;
-        Transacao transacao(valor, data, descricao);
-        _transacoes.push_back(transacao);
+
+bool Financeiro::podeGastar(double valor) const {
+    validarPositivo(valor);
+
+    return valor <= _saldo;
+}
+
+bool Financeiro::removerFundos(
+    double valor,
+    std::string data,
+    std::string descricao
+) {
+    // Eu bloqueio a compra quando nao ha saldo suficiente.
+    if (!podeGastar(valor)) {
+        return false;
     }
+
+    // Eu registro uma despesa com sinal negativo no historico.
+    _transacoes.emplace_back(
+        -valor,
+        std::move(data),
+        std::move(descricao)
+    );
+
+    _despesasTotais += valor;
+    _saldo -= valor;
+
+    return true;
 }
-void Financeiro::exibirHistoricoDeTransacoes(){
-    for(int i=_transacoes.size()-1; i>=0; i--){
-        std::cout << std::fixed << std::setprecision(2) << "Valor: R$" << _transacoes[i].getValor() << ".\n";
-        std::cout << "Data: " << _transacoes[i].getData() << ".\n";
-        std::cout << "Descricao: " << _transacoes[i].getDescricao() << ".\n";
+
+void Financeiro::exibirHistoricoDeTransacoes() const {
+    for (
+        auto it = _transacoes.rbegin();
+        it != _transacoes.rend();
+        ++it
+    ) {
+        // Eu copio a transacao porque os getters originais ainda nao sao const.
+        Transacao transacao = *it;
+
+        std::cout
+            << std::fixed
+            << std::setprecision(2)
+            << "Valor: R$ "
+            << transacao.getValor()
+            << '\n'
+            << "Data: "
+            << transacao.getData()
+            << '\n'
+            << "Descricao: "
+            << transacao.getDescricao()
+            << "\n\n";
     }
 }
