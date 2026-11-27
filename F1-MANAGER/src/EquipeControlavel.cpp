@@ -12,28 +12,20 @@ namespace {
 void validarCompetencia(
     const std::string& competencia
 ) {
-    if (
-        competencia.size() != 7 ||
-        competencia[4] != '-'
-    ) {
+    if (competencia.size() != 7 ||
+        competencia[4] != '-') {
         throw std::invalid_argument(
             "Competencia deve estar no formato AAAA-MM."
         );
     }
 
-    for (
-        std::size_t i = 0;
-        i < competencia.size();
-        ++i
-    ) {
+    for (std::size_t i = 0; i < competencia.size(); ++i) {
         if (i == 4) {
             continue;
         }
 
-        if (
-            competencia[i] < '0' ||
-            competencia[i] > '9'
-        ) {
+        if (competencia[i] < '0' ||
+            competencia[i] > '9') {
             throw std::invalid_argument(
                 "Competencia deve estar no formato AAAA-MM."
             );
@@ -44,11 +36,8 @@ void validarCompetencia(
         (competencia[5] - '0') * 10 +
         (competencia[6] - '0');
 
-    if (
-        mes < 1 ||
-        mes > 12 ||
-        competencia.substr(0, 4) == "0000"
-    ) {
+    if (mes < 1 || mes > 12 ||
+        competencia.substr(0, 4) == "0000") {
         throw std::invalid_argument(
             "Mes ou ano invalido na competencia."
         );
@@ -101,12 +90,10 @@ bool EquipeControlavel::melhorarCarro(
     double custo,
     const std::string& data
 ) {
-    if (
-        !std::isfinite(incremento) ||
+    if (!std::isfinite(incremento) ||
         incremento <= 0.0 ||
         !std::isfinite(custo) ||
-        custo <= 0.0
-    ) {
+        custo <= 0.0) {
         throw std::invalid_argument(
             "Incremento ou custo invalido."
         );
@@ -137,11 +124,12 @@ bool EquipeControlavel::melhorarCarro(
     const double forcaAntes =
         atualizado.calcularDesempenho();
 
-    atualizado.melhorarComponente(componente,incrementoEfetivo);
+    atualizado.melhorarComponente(
+        componente,
+        incrementoEfetivo
+    );
 
-    if (
-        atualizado.calcularDesempenho() <= forcaAntes
-    ) {
+    if (atualizado.calcularDesempenho() <= forcaAntes) {
         return false;
     }
 
@@ -150,6 +138,72 @@ bool EquipeControlavel::melhorarCarro(
         custo,
         data,
         "Melhoria de " + componente + " - " + idPiloto
+    )) {
+        return false;
+    }
+
+    piloto->getCarro() = std::move(atualizado);
+    return true;
+}
+
+// ==========================================
+// MANUTENCAO
+// ==========================================
+
+bool EquipeControlavel::realizarManutencao(
+    const std::string& idPiloto,
+    double recuperacao,
+    double custo,
+    const std::string& data
+) {
+    if (!std::isfinite(recuperacao) ||
+        recuperacao <= 0.0 ||
+        !std::isfinite(custo) ||
+        custo <= 0.0) {
+        throw std::invalid_argument(
+            "Recuperacao ou custo invalido."
+        );
+    }
+
+    Piloto* piloto = buscarPiloto(idPiloto);
+
+    if (piloto == nullptr) {
+        throw std::invalid_argument(
+            "Piloto nao encontrado."
+        );
+    }
+
+    // Cada ponto de impacto dos mecanicos aumenta a recuperacao em 5%.
+    // O bonus total e limitado a 25%.
+    const double bonus =
+        0.05 * std::min(
+            5.0,
+            calcularImpactoMecanicos()
+        );
+
+    const double recuperacaoEfetiva =
+        recuperacao * (1.0 + bonus);
+
+    // A recuperacao e testada em uma copia antes de cobrar.
+    Carro atualizado = piloto->getCarro();
+
+    const double condicaoAntes =
+        atualizado.getCondicao();
+
+    atualizado.restaurarCondicao(
+        recuperacaoEfetiva
+    );
+
+    // Nao cobra manutencao quando o carro ja esta conservado.
+    if (atualizado.getCondicao() <= condicaoAntes) {
+        return false;
+    }
+
+    // Desconta o custo somente quando existe saldo suficiente.
+    if (!_financeiro.removerFundos(
+        custo,
+        data,
+        "Manutencao do carro - " + idPiloto
     )) {
         return false;
     }
@@ -187,10 +241,7 @@ bool EquipeControlavel::pagarFolhaMensal(
 
     const double total = folhaSalarialMensal();
 
-    if (
-        !std::isfinite(total) ||
-        total <= 0.0
-    ) {
+    if (!std::isfinite(total) || total <= 0.0) {
         return false;
     }
 

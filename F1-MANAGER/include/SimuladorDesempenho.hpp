@@ -9,6 +9,7 @@
 
 #include <cstdint>
 #include <random>
+#include <unordered_map>
 
 // Parametros de simulacao.
 // Sao regras do jogo, nao dados oficiais da Formula 1.
@@ -48,7 +49,11 @@ public:
 
     // Executa o GP e registra classificacao e pontuacao.
     // A corrida deve estar no estado NAO_INICIADA.
-    void simularCorrida(Corrida& corrida);
+    // Bonus sao usados apenas nesta corrida; os atributos dos pilotos nao mudam.
+    void simularCorrida(
+        Corrida& corrida,
+        const std::unordered_map<const Piloto*, double>& bonusPorPiloto = {}
+    );
 };
 
 #endif

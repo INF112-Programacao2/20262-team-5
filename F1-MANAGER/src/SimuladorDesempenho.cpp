@@ -92,7 +92,8 @@ double SimuladorDesempenho::calcularDesempenho(
 // ========================================
 
 void SimuladorDesempenho::simularCorrida(
-    Corrida& corrida
+    Corrida& corrida,
+    const std::unordered_map<const Piloto*, double>& bonusPorPiloto
 ) {
 
     // Uma corrida finalizada nao pode ser simulada novamente.
@@ -106,6 +107,25 @@ void SimuladorDesempenho::simularCorrida(
         throw std::logic_error(
             "A corrida exige pelo menos dois pilotos."
         );
+    }
+
+    // Garante que os bonus pertencem a pilotos inscritos e respeitam o limite.
+    for (const auto& entrada : bonusPorPiloto) {
+        const bool inscrito = std::find(
+            corrida.getPilotos().begin(),
+            corrida.getPilotos().end(),
+            entrada.first
+        ) != corrida.getPilotos().end();
+
+        if (!inscrito ||
+            !std::isfinite(entrada.second) ||
+            entrada.second < 0.0 ||
+            entrada.second > 3.0) {
+
+            throw std::invalid_argument(
+                "Bonus estrategico invalido."
+            );
+        }
     }
 
     // ========================================
@@ -164,7 +184,6 @@ void SimuladorDesempenho::simularCorrida(
     );
 
     for (Piloto* piloto : corrida.getPilotos()) {
-
         if (piloto == nullptr) {
             throw std::logic_error(
                 "Piloto nulo na corrida."
@@ -201,10 +220,11 @@ void SimuladorDesempenho::simularCorrida(
     // SIMULACAO VOLTA A VOLTA
     // ========================================
 
-    for (int volta = 0;
-         volta < corrida.getQtdVoltas();
-         ++volta) {
-
+    for (
+        int volta = 0;
+        volta < corrida.getQtdVoltas();
+        ++volta
+    ) {
         for (PilotoNaPista& estado : participantes) {
 
             // Pilotos que abandonaram nao continuam.
@@ -254,10 +274,23 @@ void SimuladorDesempenho::simularCorrida(
             // DESEMPENHO DO PILOTO E DO CARRO
             // ========================================
 
-            const double indice = calcularDesempenho(
-                *estado.piloto,
-                estado.carro,
-                clima
+            const auto itBonus =
+                bonusPorPiloto.find(estado.piloto);
+
+            const double bonus =
+                itBonus == bonusPorPiloto.end()
+                    ? 0.0
+                    : itBonus->second;
+
+            // Estrategia melhora o ritmo apenas nesta corrida.
+            const double indice = std::clamp(
+                calcularDesempenho(
+                    *estado.piloto,
+                    estado.carro,
+                    clima
+                ) + bonus,
+                0.0,
+                100.0
             );
 
             // Pilotos e carros melhores tendem a completar
@@ -318,6 +351,7 @@ void SimuladorDesempenho::simularCorrida(
                 fatorPeso;
 
             estado.tempo += tempoVolta;
+
             ++estado.voltas;
         }
     }

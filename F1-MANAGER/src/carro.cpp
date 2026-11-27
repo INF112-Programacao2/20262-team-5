@@ -1,6 +1,7 @@
 
 #include "carro.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <stdexcept>
 #include <utility>
@@ -32,14 +33,65 @@ Carro::Carro(
     }
 }
 
+// ==========================================
+// CONDICAO E DESGASTE
+// ==========================================
+
+double Carro::getCondicao() const {
+    return _condicao;
+}
+
+void Carro::desgastar(double pontos) {
+    if (!std::isfinite(pontos) || pontos <= 0.0) {
+        throw std::invalid_argument(
+            "Desgaste invalido."
+        );
+    }
+
+    // A condicao nunca pode ficar abaixo de zero.
+    _condicao = std::max(
+        0.0,
+        _condicao - pontos
+    );
+}
+
+void Carro::restaurarCondicao(double pontos) {
+    if (!std::isfinite(pontos) || pontos <= 0.0) {
+        throw std::invalid_argument(
+            "Recuperacao invalida."
+        );
+    }
+
+    // A manutencao nao ultrapassa a condicao maxima.
+    _condicao = std::min(
+        100.0,
+        _condicao + pontos
+    );
+}
+
+// ==========================================
+// DESEMPENHO
+// ==========================================
+
 double Carro::calcularDesempenho() const {
 
     // Pesos didaticos, configuraveis futuramente para cada GP.
-    return 0.35 * _motor.calcularDesempenho()
-         + 0.25 * _freio.calcularDesempenho()
-         + 0.20 * _suspensao.calcularDesempenho()
-         + 0.20 * _chassi.calcularDesempenho();
+    const double qualidade =
+        0.35 * _motor.calcularDesempenho()
+      + 0.25 * _freio.calcularDesempenho()
+      + 0.20 * _suspensao.calcularDesempenho()
+      + 0.20 * _chassi.calcularDesempenho();
+
+    // Um carro desgastado perde ate 30% do desempenho teorico.
+    // Com condicao igual a 100, a formula anterior nao muda.
+    return qualidade * (
+        0.70 + 0.30 * _condicao / 100.0
+    );
 }
+
+// ==========================================
+// COMBUSTIVEL
+// ==========================================
 
 bool Carro::consumirCombustivel(double quantidade) {
 
@@ -54,8 +106,13 @@ bool Carro::consumirCombustivel(double quantidade) {
     }
 
     _combustivel -= quantidade;
+
     return true;
 }
+
+// ==========================================
+// MELHORIAS
+// ==========================================
 
 void Carro::melhorarComponente(
     const std::string& nome,

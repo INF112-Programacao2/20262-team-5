@@ -236,6 +236,57 @@ double Equipe::calcularImpactoEngenheiros() const {
     return total;
 }
 
+double Equipe::calcularImpactoMecanicos() const {
+    double total = 0.0;
+
+    // Apenas os mecanicos contribuem para a manutencao.
+    for (const auto& funcionario : _funcionarios) {
+        const auto* mecanico =
+            dynamic_cast<const Mecanico*>(
+                funcionario.get()
+            );
+
+        if (mecanico != nullptr) {
+            total += mecanico->calcularImpacto();
+        }
+    }
+
+    return total;
+}
+
+double Equipe::calcularBonusEstrategia() const {
+    double impactoEstrategistas = 0.0;
+    double impactoChefia = 0.0;
+
+    for (const auto& funcionario : _funcionarios) {
+        if (const auto* estrategista =
+                dynamic_cast<const Estrategista*>(
+                    funcionario.get()
+                )) {
+
+            impactoEstrategistas +=
+                estrategista->calcularImpacto();
+        }
+
+        if (const auto* chefe =
+                dynamic_cast<const ChefeEquipe*>(
+                    funcionario.get()
+                )) {
+
+            impactoChefia +=
+                chefe->calcularImpacto();
+        }
+    }
+
+    // Bonus de ate tres pontos no indice de ritmo durante o GP.
+    return std::clamp(
+        0.30 * impactoEstrategistas +
+        0.20 * impactoChefia,
+        0.0,
+        3.0
+    );
+}
+
 // ==========================================
 // ENCERRAMENTO DA TEMPORADA
 // ==========================================
