@@ -27,6 +27,9 @@ protected:
     // Somente engenheiros contribuem para o bonus das melhorias.
     double calcularImpactoEngenheiros() const;
 
+    // Considera apenas mecanicos no bonus de manutencao.
+    double calcularImpactoMecanicos() const;
+
 public:
     explicit Equipe(std::string nome);
     virtual ~Equipe() = default;
@@ -39,6 +42,29 @@ public:
 
     std::size_t quantidadePilotos() const;
     std::size_t quantidadeFuncionarios() const;
+
+    // Devolve ponteiros nao-donos; a equipe continua responsavel pela vida dos pilotos.
+    std::vector<Piloto*> listarPilotos() {
+        std::vector<Piloto*> lista;
+        lista.reserve(_pilotos.size());
+
+        for (const auto& piloto : _pilotos) {
+            lista.push_back(piloto.get());
+        }
+
+        return lista;
+    }
+
+    std::vector<const Piloto*> listarPilotos() const {
+        std::vector<const Piloto*> lista;
+        lista.reserve(_pilotos.size());
+
+        for (const auto& piloto : _pilotos) {
+            lista.push_back(piloto.get());
+        }
+
+        return lista;
+    }
 
     // Gerenciamento de pilotos.
     void cadastrarPiloto(Piloto piloto);
@@ -74,6 +100,9 @@ public:
 
     // Soma os impactos individuais; o efeito nas corridas sera integrado depois.
     double calcularImpactoFuncionarios() const;
+
+    // Bonus de ritmo para uma etapa, baseado em estrategistas e chefe de equipe.
+    double calcularBonusEstrategia() const;
 
     void encerrarTemporada();
 

@@ -13,6 +13,9 @@ private:
     int _ano;
     double _combustivel;
 
+    // Representa o estado de conservacao geral do carro.
+    double _condicao = 100.0;
+
     f1::Motor _motor;
     f1::Freio _freio;
     f1::Suspensao _suspensao;
@@ -42,6 +45,15 @@ public:
         return _combustivel;
     }
 
+    // Condicao geral do carro: 100 representa conservacao total.
+    double getCondicao() const;
+
+    // Reduz a condicao entre 0 e 100.
+    void desgastar(double pontos);
+
+    // Recupera a condicao ate o limite de 100 pontos.
+    void restaurarCondicao(double pontos);
+
     // Indice didatico de desempenho, de 0 a 100.
     double calcularDesempenho() const;
 
@@ -54,4 +66,3 @@ public:
         double incremento = 5.0
     );
 };
-

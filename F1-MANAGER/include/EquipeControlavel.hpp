@@ -23,7 +23,6 @@ public:
     );
 
     Financeiro& getFinanceiro();
-
     const Financeiro& getFinanceiro() const;
 
     double calcularForcaEquipe() const override;
@@ -33,6 +32,14 @@ public:
         const std::string& idPiloto,
         const std::string& componente,
         double incremento,
+        double custo,
+        const std::string& data
+    );
+
+    // Recupera a condicao do carro apos descontar o custo da oficina.
+    bool realizarManutencao(
+        const std::string& idPiloto,
+        double recuperacao,
         double custo,
         const std::string& data
     );
