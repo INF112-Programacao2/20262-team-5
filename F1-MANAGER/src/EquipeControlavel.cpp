@@ -1,12 +1,66 @@
 
 #include "EquipeControlavel.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <stdexcept>
 #include <utility>
 
-//  inicializo a classe Equipe e o financeiro
-// com o orcamento informado no cadastro.
+namespace {
+
+// Aceita competencias validas no formato AAAA-MM.
+void validarCompetencia(
+    const std::string& competencia
+) {
+    if (
+        competencia.size() != 7 ||
+        competencia[4] != '-'
+    ) {
+        throw std::invalid_argument(
+            "Competencia deve estar no formato AAAA-MM."
+        );
+    }
+
+    for (
+        std::size_t i = 0;
+        i < competencia.size();
+        ++i
+    ) {
+        if (i == 4) {
+            continue;
+        }
+
+        if (
+            competencia[i] < '0' ||
+            competencia[i] > '9'
+        ) {
+            throw std::invalid_argument(
+                "Competencia deve estar no formato AAAA-MM."
+            );
+        }
+    }
+
+    const int mes =
+        (competencia[5] - '0') * 10 +
+        (competencia[6] - '0');
+
+    if (
+        mes < 1 ||
+        mes > 12 ||
+        competencia.substr(0, 4) == "0000"
+    ) {
+        throw std::invalid_argument(
+            "Mes ou ano invalido na competencia."
+        );
+    }
+}
+
+} // namespace
+
+// ==========================================
+// CONSTRUTOR
+// ==========================================
+
 EquipeControlavel::EquipeControlavel(
     std::string nome,
     double orcamento
@@ -16,7 +70,7 @@ EquipeControlavel::EquipeControlavel(
 }
 
 // ==========================================
-// ACESSO AO FINANCEIRO
+// FINANCEIRO
 // ==========================================
 
 Financeiro& EquipeControlavel::getFinanceiro() {
@@ -33,9 +87,6 @@ EquipeControlavel::getFinanceiro() const {
 // ==========================================
 
 double EquipeControlavel::calcularForcaEquipe() const {
-
-    // Eu aproveito o calculo da classe base para
-    // considerar os carros e atributos dos pilotos.
     return calcularForcaPilotos();
 }
 
@@ -50,8 +101,6 @@ bool EquipeControlavel::melhorarCarro(
     double custo,
     const std::string& data
 ) {
-    // Eu verifico se os valores informados sao validos
-    // antes de iniciar a compra da melhoria.
     if (
         !std::isfinite(incremento) ||
         incremento <= 0.0 ||
@@ -63,7 +112,6 @@ bool EquipeControlavel::melhorarCarro(
         );
     }
 
-    //  procurar o piloto pelo identificador.
     Piloto* piloto = buscarPiloto(idPiloto);
 
     if (piloto == nullptr) {
@@ -72,30 +120,32 @@ bool EquipeControlavel::melhorarCarro(
         );
     }
 
-    // testar primeiro a melhoria em uma copia, para nao
-    // cobrar por componente desconhecido ou ja no limite.
+    // Cada ponto de impacto dos engenheiros aumenta o ganho em 2%.
+    // O bonus total e limitado a 10% para preservar o balanceamento.
+    const double bonus =
+        0.02 * std::min(
+            5.0,
+            calcularImpactoEngenheiros()
+        );
+
+    const double incrementoEfetivo =
+        incremento * (1.0 + bonus);
+
+    // A melhoria e testada primeiro em uma copia, evitando compras sem efeito.
     Carro atualizado = piloto->getCarro();
 
-    double forcaAntes =
+    const double forcaAntes =
         atualizado.calcularDesempenho();
 
-    // Aplicar a melhoria primeiro na copia do carro.
-    atualizado.melhorarComponente(
-        componente,
-        incremento
-    );
+    atualizado.melhorarComponente(componente,incrementoEfetivo);
 
-    double forcaDepois =
-        atualizado.calcularDesempenho();
-
-    // cancelar a compra caso a melhoria nao
-    // tenha aumentado o desempenho do carro.
-    if (forcaDepois <= forcaAntes) {
+    if (
+        atualizado.calcularDesempenho() <= forcaAntes
+    ) {
         return false;
     }
 
-    // cobro apenas depois de validar que a melhoria funciona.
-    // Se o dinheiro for insuficiente, o Financeiro retorna false.
+    // O carro original e atualizado somente apos a cobranca ser aprovada.
     if (!_financeiro.removerFundos(
         custo,
         data,
@@ -104,20 +154,78 @@ bool EquipeControlavel::melhorarCarro(
         return false;
     }
 
-    // atualizo o carro original somente depois
-    // que a compra foi autorizada.
     piloto->getCarro() = std::move(atualizado);
 
     return true;
 }
 
 // ==========================================
-// GERENCIAMENTO FINANCEIRO
+// CONSULTA DE SALARIOS PAGOS
+// ==========================================
+
+bool EquipeControlavel::folhaJaPaga(
+    const std::string& competencia
+) const {
+    validarCompetencia(competencia);
+
+    return _competenciasPagas.count(competencia) != 0;
+}
+
+// ==========================================
+// PAGAMENTO DA FOLHA SALARIAL
+// ==========================================
+
+bool EquipeControlavel::pagarFolhaMensal(
+    const std::string& competencia
+) {
+    validarCompetencia(competencia);
+
+    // Impede a cobranca duplicada do mesmo mes.
+    if (folhaJaPaga(competencia)) {
+        return false;
+    }
+
+    const double total = folhaSalarialMensal();
+
+    if (
+        !std::isfinite(total) ||
+        total <= 0.0
+    ) {
+        return false;
+    }
+
+    // Registra o mes apenas se a despesa for aceita.
+    const auto insercao =
+        _competenciasPagas.insert(competencia);
+
+    try {
+        if (!_financeiro.removerFundos(
+            total,
+            competencia,
+            "Folha salarial - " + competencia
+        )) {
+            _competenciasPagas.erase(
+                insercao.first
+            );
+
+            return false;
+        }
+    }
+    catch (...) {
+        _competenciasPagas.erase(
+            insercao.first
+        );
+
+        throw;
+    }
+
+    return true;
+}
+
+// ==========================================
+// HISTORICO FINANCEIRO
 // ==========================================
 
 void EquipeControlavel::gerenciarFinanceiro() const {
-
-    // utilizo o historico do Financeiro para
-    // consultar as movimentacoes realizadas.
     _financeiro.exibirHistoricoDeTransacoes();
 }

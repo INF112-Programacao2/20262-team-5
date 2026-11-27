@@ -9,7 +9,6 @@
 
 namespace {
 
-// rejeitair valores negativos, infinitos e NaN para manter o caixa valido.
 void validarNaoNegativo(double valor) {
     if (!std::isfinite(valor) || valor < 0.0) {
         throw std::invalid_argument(
@@ -18,7 +17,6 @@ void validarNaoNegativo(double valor) {
     }
 }
 
-//  esta verificacao nas movimentacoes, que devem ter valor maior que zero.
 void validarPositivo(double valor) {
     if (!std::isfinite(valor) || valor <= 0.0) {
         throw std::invalid_argument(
@@ -35,9 +33,12 @@ Financeiro::Financeiro(double orcamento)
       _despesasTotais(0.0),
       _receitasTotais(0.0) {
 
-    //  considero o orcamento inicial como o dinheiro disponivel em caixa.
     validarNaoNegativo(orcamento);
 }
+
+// ==========================================
+// GETTERS E SETTERS
+// ==========================================
 
 double Financeiro::getSaldo() const {
     return _saldo;
@@ -61,7 +62,9 @@ double Financeiro::getDespesasTotais() const {
     return _despesasTotais;
 }
 
-void Financeiro::setDespesasTotais(double despesasTotais) {
+void Financeiro::setDespesasTotais(
+    double despesasTotais
+) {
     validarNaoNegativo(despesasTotais);
     _despesasTotais = despesasTotais;
 }
@@ -70,26 +73,39 @@ double Financeiro::getReceitasTotais() const {
     return _receitasTotais;
 }
 
-void Financeiro::setReceitasTotais(double receitasTotais) {
+void Financeiro::setReceitasTotais(
+    double receitasTotais
+) {
     validarNaoNegativo(receitasTotais);
     _receitasTotais = receitasTotais;
 }
 
+// ==========================================
+// TRANSACOES
+// ==========================================
+
 Transacao Financeiro::getTransacao(int i) const {
-    // usei o at() para identificar acessos fora dos limites do vetor.
-    return _transacoes.at(static_cast<std::size_t>(i));
+    return _transacoes.at(
+        static_cast<std::size_t>(i)
+    );
 }
 
-void Financeiro::setTransacao(Transacao transacao, int i) {
-    // mantenho este metodo para compatibilidade com o projeto original.
-    // Nas operacoes normais, eu prefiro registrar receitas e despesas pelos metodos proprios.
-    _transacoes.at(static_cast<std::size_t>(i)) =
-        std::move(transacao);
+void Financeiro::setTransacao(
+    Transacao transacao,
+    int i
+) {
+    _transacoes.at(
+        static_cast<std::size_t>(i)
+    ) = std::move(transacao);
 }
 
 std::size_t Financeiro::quantidadeTransacoes() const {
     return _transacoes.size();
 }
+
+// ==========================================
+// RECEITAS
+// ==========================================
 
 void Financeiro::adicionarFundos(
     double valor,
@@ -98,7 +114,6 @@ void Financeiro::adicionarFundos(
 ) {
     validarPositivo(valor);
 
-    // registrei a receita antes de atualizar o caixa e os totais.
     _transacoes.emplace_back(
         valor,
         std::move(data),
@@ -108,6 +123,10 @@ void Financeiro::adicionarFundos(
     _receitasTotais += valor;
     _saldo += valor;
 }
+
+// ==========================================
+// DESPESAS
+// ==========================================
 
 bool Financeiro::podeGastar(double valor) const {
     validarPositivo(valor);
@@ -120,12 +139,11 @@ bool Financeiro::removerFundos(
     std::string data,
     std::string descricao
 ) {
-    // Eu bloqueio a compra quando nao ha saldo suficiente.
     if (!podeGastar(valor)) {
         return false;
     }
 
-    // Eu registro uma despesa com sinal negativo no historico.
+    // Despesas sao registradas com valores negativos.
     _transacoes.emplace_back(
         -valor,
         std::move(data),
@@ -138,13 +156,17 @@ bool Financeiro::removerFundos(
     return true;
 }
 
+// ==========================================
+// HISTORICO
+// ==========================================
+
 void Financeiro::exibirHistoricoDeTransacoes() const {
     for (
         auto it = _transacoes.rbegin();
         it != _transacoes.rend();
         ++it
     ) {
-        // Eu copio a transacao porque os getters originais ainda nao sao const.
+        // Os getters originais de Transacao nao sao const.
         Transacao transacao = *it;
 
         std::cout
@@ -152,10 +174,14 @@ void Financeiro::exibirHistoricoDeTransacoes() const {
             << std::setprecision(2)
             << "Valor: R$ "
             << transacao.getValor()
-            << '\n'
+            << '\n';
+
+        std::cout
             << "Data: "
             << transacao.getData()
-            << '\n'
+            << '\n';
+
+        std::cout
             << "Descricao: "
             << transacao.getDescricao()
             << "\n\n";

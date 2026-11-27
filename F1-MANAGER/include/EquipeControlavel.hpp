@@ -5,13 +5,16 @@
 #include "equipe.hpp"
 #include "financeiro.hpp"
 
+#include <set>
 #include <string>
 
-// Eu separo a equipe controlada das adversarias para
-// deixar as compras e decisoes do jogador nesta classe.
+// Equipe administrada pelo jogador, com controle financeiro e melhorias.
 class EquipeControlavel : public Equipe {
 private:
     Financeiro _financeiro;
+
+    // Armazena os meses que ja tiveram seus salarios pagos.
+    std::set<std::string> _competenciasPagas;
 
 public:
     EquipeControlavel(
@@ -19,16 +22,13 @@ public:
         double orcamento
     );
 
-    // Eu disponibilizo o financeiro para consultar
-    // o saldo, as receitas e as despesas da equipe.
     Financeiro& getFinanceiro();
+
     const Financeiro& getFinanceiro() const;
 
-    // Eu sobrescrevo o metodo abstrato da classe Equipe.
     double calcularForcaEquipe() const override;
 
-    // Eu so aplico a melhoria se a equipe puder pagar.
-    // O id e string porque Pessoa::getId() retorna string.
+    // Aplica a melhoria apenas se o componente puder evoluir e houver saldo.
     bool melhorarCarro(
         const std::string& idPiloto,
         const std::string& componente,
@@ -37,7 +37,16 @@ public:
         const std::string& data
     );
 
-    // Eu uso este metodo para consultar as movimentacoes.
+    // Registra um unico pagamento por competencia (formato AAAA-MM).
+    // Retorna false se ja foi pago ou se o caixa for insuficiente.
+    bool pagarFolhaMensal(
+        const std::string& competencia
+    );
+
+    bool folhaJaPaga(
+        const std::string& competencia
+    ) const;
+
     void gerenciarFinanceiro() const;
 };
 

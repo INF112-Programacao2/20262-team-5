@@ -35,22 +35,20 @@ public:
     Transacao getTransacao(int i) const;
     void setTransacao(Transacao transacao, int i);
 
-    // usei esse metodo para consultar o tamanho do historico.
     std::size_t quantidadeTransacoes() const;
 
     //Registra uma transacao positiva - aumenta o saldo - registra nas receitas totais
-    // verifico se o valor eh positivo antes de registrar a receita.
     void adicionarFundos(
         double valor,
         std::string data,
         std::string descricao
     );
 
-    // verifico o saldo antes de autorizar qualquer despesa.
+    // Verifica se existe saldo suficiente para realizar uma despesa.
     bool podeGastar(double valor) const;
 
     //Caso o orcamento permita --> reduz o saldo - registra uma transacao negativa - registra nas despesas totais
-    // retorno true quando consigo pagar e false quando o saldo eh insuficiente.
+    // Retorna false quando o saldo disponivel nao cobre o valor solicitado.
     bool removerFundos(
         double valor,
         std::string data,
@@ -59,7 +57,6 @@ public:
 
     //Exibe as transacoes a partir da mais recente
     //Por enquanto eh fe de que o usuario vai colocar na ordem certa, mas um sort nao faria mal
-    // Eu percorro o vetor de tras para frente para mostrar a ultima transacao primeiro.
     void exibirHistoricoDeTransacoes() const;
 };
 
