@@ -518,12 +518,8 @@ void contratarFuncionario(
         1000000.0
     );
 
-    const int tempo = lerInteiro(
-        "Tempo de servico, em anos (0 a 50): ",
-        0,
-        50
-    );
-
+ // Todo funcionario contratado comeca sem tempo de servico.
+const int tempo = 0;
     const Contrato contrato(
         12, salario, 0.0
     );
