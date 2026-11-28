@@ -27,16 +27,14 @@ double Contrato :: getRescisao() const{
 //setters
 void Contrato :: setDuracao(int duracao){
    if(duracao <= 0){
-    throw std::invalid_argument("Erro! o contrato não pode ter duração negativa!");
+    throw std::invalid_argument("Erro! A duração do contrato deve ser maior que zero");
    }
-   else{
     _duracao = duracao;
-   }
 }
 
 void Contrato :: setSalario(double salario){
     if(salario <= 0){
-      throw std::invalid_argument("Erro! o contrato não pode ter um salário negativo");
+      throw std::invalid_argument("Erro! O salário do contrato deve ser maior que zero");
     }
     else{
       _salario = salario;  
