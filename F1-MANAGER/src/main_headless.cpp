@@ -495,115 +495,123 @@ void contratarFuncionario(
     std::vector<std::string>& contratados,
     int& proximoId
 ) {
-    std::cout
-        << "\n1. Engenheiro\n"
-        << "2. Mecanico\n"
-        << "3. Estrategista\n"
-        << "4. Chefe de equipe\n";
+    while (true) {
+        std::cout
+            << "\n1. Engenheiro\n"
+            << "2. Mecanico\n"
+            << "3. Estrategista\n"
+            << "4. Chefe de equipe\n"
+            << "0. Voltar\n";
 
-    const int cargo = lerInteiro(
-        "Cargo: ", 1, 4
-    );
-
-    const std::string nome =
-        lerTexto("Nome: ");
-
-    const int idade = lerInteiro(
-        "Idade (18 a 100): ", 18, 100
-    );
-
-    const double salario = lerValor(
-        "Salario mensal (1000 a 1000000): ",
-        1000.0,
-        1000000.0
-    );
-
- // Todo funcionario contratado comeca sem tempo de servico.
-const int tempo = 0;
-    const Contrato contrato(
-        12, salario, 0.0
-    );
-
-    const std::string id =
-        "F" + std::to_string(proximoId);
-
-    std::unique_ptr<Funcionario> funcionario;
-
-    if (cargo == 1) {
-        const std::string especialidade =
-            lerTexto("Especialidade: ");
-
-        funcionario =
-            std::make_unique<Engenheiro>(
-                nome,
-                id,
-                idade,
-                contrato,
-                tempo,
-                especialidade
-            );
-    }
-    else if (cargo == 2) {
-        const int habilidade = lerInteiro(
-            "Habilidade (0 a 100): ",
-            0, 100
+        const int cargo = lerInteiro(
+            "Cargo: ", 0, 4
         );
 
-        funcionario =
-            std::make_unique<Mecanico>(
-                nome,
-                id,
-                idade,
-                contrato,
-                tempo,
-                habilidade
-            );
-    }
-    else if (cargo == 3) {
-        const int experiencia = lerInteiro(
-            "Experiencia (0 a 50): ",
-            0, 50
+        if (cargo == 0) {
+            break;
+        }
+
+        const std::string nome =
+            lerTexto("Nome: ");
+
+        const int idade = lerInteiro(
+            "Idade (18 a 100): ", 18, 100
         );
 
-        funcionario =
-            std::make_unique<Estrategista>(
-                nome,
-                id,
-                idade,
-                contrato,
-                tempo,
-                experiencia
-            );
-    }
-    else {
-        const int experiencia = lerInteiro(
-            "Experiencia (0 a 50): ",
-            0, 50
+        const double salario = lerValor(
+            "Salario mensal (1000 a 1000000): ",
+            1000.0,
+            1000000.0
         );
 
-        funcionario =
-            std::make_unique<ChefeEquipe>(
-                nome,
-                id,
-                idade,
-                contrato,
-                tempo,
-                experiencia
+        // Todo funcionario contratado comeca sem tempo de servico.
+        const int tempo = 0;
+
+        const Contrato contrato(
+            12, salario, 0.0
+        );
+
+        const std::string id =
+            "F" + std::to_string(proximoId);
+
+        std::unique_ptr<Funcionario> funcionario;
+
+        if (cargo == 1) {
+            const std::string especialidade =
+                lerTexto("Especialidade: ");
+
+            funcionario =
+                std::make_unique<Engenheiro>(
+                    nome,
+                    id,
+                    idade,
+                    contrato,
+                    tempo,
+                    especialidade
+                );
+        }
+        else if (cargo == 2) {
+            const int habilidade = lerInteiro(
+                "Habilidade (0 a 100): ",
+                0, 100
             );
+
+            funcionario =
+                std::make_unique<Mecanico>(
+                    nome,
+                    id,
+                    idade,
+                    contrato,
+                    tempo,
+                    habilidade
+                );
+        }
+        else if (cargo == 3) {
+            const int experiencia = lerInteiro(
+                "Experiencia (0 a 50): ",
+                0, 50
+            );
+
+            funcionario =
+                std::make_unique<Estrategista>(
+                    nome,
+                    id,
+                    idade,
+                    contrato,
+                    tempo,
+                    experiencia
+                );
+        }
+        else {
+            const int experiencia = lerInteiro(
+                "Experiencia (0 a 50): ",
+                0, 50
+            );
+
+            funcionario =
+                std::make_unique<ChefeEquipe>(
+                    nome,
+                    id,
+                    idade,
+                    contrato,
+                    tempo,
+                    experiencia
+                );
+        }
+
+        // A propriedade do funcionario passa para a Mercedes.
+        mercedes.cadastrarFuncionario(
+            std::move(funcionario)
+        );
+
+        contratados.push_back(id);
+        ++proximoId;
+
+        std::cout
+            << "Funcionario contratado! ID: "
+            << id
+            << ". O salario entrara na folha mensal.\n";
     }
-
-    // A propriedade do funcionario passa para a Mercedes.
-    mercedes.cadastrarFuncionario(
-        std::move(funcionario)
-    );
-
-    contratados.push_back(id);
-    ++proximoId;
-
-    std::cout
-        << "Funcionario contratado! ID: "
-        << id
-        << ". O salario entrara na folha mensal.\n";
 }
 
 // ==========================================
