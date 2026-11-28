@@ -373,25 +373,12 @@ Piloto& escolherPiloto(
 // ==========================================
 // MELHORIAS DE COMPONENTES
 // ==========================================
-
-void melhorarCarro(
-    Campeonato& campeonato
-) {
+void melhorarCarro(Campeonato& campeonato) {
     EquipeControlavel& mercedes =
         campeonato.getMercedes();
 
     Piloto& piloto =
         escolherPiloto(mercedes);
-
-    std::cout
-        << "\n1. Motor      (+2 pontos, custo 500000)\n"
-        << "2. Freio      (+2 pontos, custo 250000)\n"
-        << "3. Suspensao  (+2 pontos, custo 300000)\n"
-        << "4. Chassi     (+2 pontos, custo 400000)\n";
-
-    const int opcao = lerInteiro(
-        "Componente: ", 1, 4
-    );
 
     const std::string componentes[] = {
         "motor",
@@ -407,26 +394,42 @@ void melhorarCarro(
         400000.0
     };
 
-    const std::size_t indice =
-        static_cast<std::size_t>(opcao - 1);
+    while (true) {
+        std::cout
+            << "\n1. Motor      (+2 pontos, custo 500000)\n"
+            << "2. Freio      (+2 pontos, custo 250000)\n"
+            << "3. Suspensao  (+2 pontos, custo 300000)\n"
+            << "4. Chassi     (+2 pontos, custo 400000)\n"
+            << "0. Voltar\n";
 
-    const bool realizada =
-        mercedes.melhorarCarro(
-            piloto.getId(),
-            componentes[indice],
-            2.0,
-            custos[indice],
-            dataReferencia(campeonato)
+        const int opcao = lerInteiro(
+            "Componente: ", 0, 4
         );
 
-    std::cout
-        << (realizada
-            ? "Melhoria concluida!\n"
-            : "Compra recusada: saldo insuficiente ou peca no limite.\n");
+        if (opcao == 0) {
+            break;
+        }
 
-    exibirCarros(mercedes);
+        const std::size_t indice =
+            static_cast<std::size_t>(opcao - 1);
+
+        const bool realizada =
+            mercedes.melhorarCarro(
+                piloto.getId(),
+                componentes[indice],
+                2.0,
+                custos[indice],
+                dataReferencia(campeonato)
+            );
+
+        std::cout
+            << (realizada
+                ? "Melhoria concluida!\n"
+                : "Compra recusada: saldo insuficiente ou peca no limite.\n");
+
+        exibirCarros(mercedes);
+    }
 }
-
 // ==========================================
 // MANUTENCAO DOS CARROS
 // ==========================================
